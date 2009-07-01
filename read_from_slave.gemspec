@@ -2,12 +2,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{read_from_slave}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Stephen Sykes"]
-  s.date = %q{2009-06-25}
-  s.description = %q{Read_from_slave causes database reads to be done from a configured slave database, while writes continue to go to the master}
+  s.date = %q{2009-07-01}
+  s.description = %q{Read_from_slave for Rails enables database reads from a slave database, while writes continue to go to the master}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = ["README", "README.textile"]
   s.files = ["Rakefile", "README", "README.textile", "VERSION.yml", "lib/read_from_slave.rb", "test/test.rb"]
