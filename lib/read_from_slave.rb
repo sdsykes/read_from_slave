@@ -22,20 +22,28 @@ module ReadFromSlave
     def connection_with_read_from_slave
       normal_connection = connection_without_read_from_slave
       if Thread.current[:read_from_slave] && normal_connection.open_transactions == 0
-        @slave_connection || slave_connection
+        slave_connection
       else
         normal_connection
       end
     end
     
     def slave_connection
-      slave_class_name = "SlaveFor#{master_database_name}"
-      @@slave_connections ||= {}
-      unless @@slave_connections[slave_class_name]
-        eval "class #{slave_class_name} < ActiveRecord::Base; use_slave_db; end"
-        @@slave_connections[slave_class_name] = eval "#{slave_class_name}.connection_without_read_from_slave"
+      (@slave_model || slave_model).connection_without_read_from_slave
+    end
+
+    def slave_model
+      slave_model_name = "ReadFromSlaveFor_#{master_database_name}"
+      @@slave_models ||= {}
+      unless @@slave_models[slave_model_name]
+        @@slave_models[slave_model_name] = eval %{
+          class #{slave_model_name} < ActiveRecord::Base
+            use_slave_db
+          end
+          #{slave_model_name}
+        }
       end
-      @slave_connection = @@slave_connections[slave_class_name]
+      @slave_model = @@slave_models[slave_model_name]
     end
 
     def master_database_name
