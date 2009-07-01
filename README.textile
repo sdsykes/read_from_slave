@@ -2,6 +2,28 @@ h1. Read_from_slave
 
 h4. Read_from_slave for Rails enables database reads from a slave database, while writes continue to go to the master
 
-h2. The problem
+h2. Installation
 
 todo
+
+h2. Configuration
+
+todo
+
+
+h2. Todo
+
+* Support pool of multiple slaves 
+
+
+h2. References
+
+* "Masochism":http://github.com/technoweenie/masochism/tree/master
+** not thread safe
+** won't work with apps that talk to multiple (master) databases
+* "Acts as readonlyable":http://rubyforge.org/projects/acts-as-with-ro/
+** old, not suitable for Rails 2.x
+
+
+
+(c) 2009 Stephen Sykes
