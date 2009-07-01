@@ -1,0 +1,7 @@
+h1. Read_from_slave
+
+h4. Read_from_slave causes database reads to be done from a configured slave database, while writes continue to go to the master
+
+h2. The problem
+
+todo
