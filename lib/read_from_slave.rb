@@ -39,7 +39,7 @@ module ReadFromSlave
         @@slave_models[slave_model_name] = eval %{
           class #{slave_model_name} < ActiveRecord::Base
             self.abstract_class = true
-            use_slave_db
+            use_slave_db_for('#{master_database_name}')
           end
           #{slave_model_name}
         }
@@ -51,8 +51,8 @@ module ReadFromSlave
       connection_without_read_from_slave.instance_variable_get(:@config)[:database]
     end
 
-    def use_slave_db
-      conn_spec = configurations["slave_for_#{master_database_name}"]
+    def use_slave_db_for(master)
+      conn_spec = configurations["slave_for_#{master}"]
       establish_connection(conn_spec) if conn_spec
     end
   end
