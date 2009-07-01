@@ -38,6 +38,7 @@ module ReadFromSlave
       unless @@slave_models[slave_model_name]
         @@slave_models[slave_model_name] = eval %{
           class #{slave_model_name} < ActiveRecord::Base
+            self.abstract_class = true
             use_slave_db
           end
           #{slave_model_name}
