@@ -4,17 +4,54 @@ h4. Read_from_slave for Rails enables database reads from a slave database, whil
 
 h2. Installation
 
-todo
+<pre>
+<code>
+sudo gem install sdsykes-read_from_slave
+</code>
+</pre>
 
 h2. Configuration
 
-todo
+In config/environments/production.rb (for instance)
 
+<pre>
+<code>
+config.gem "sdsykes-read_from_slave", :lib=>"read_from_slave"
+</code>
+</pre>
+
+In config/database.yml
+
+<pre>
+<code>
+production:
+  adapter: mysql
+  database: mydatabase
+  username: myuser
+  password: mypassword
+  host: my.main.database.server.com
+  port: 3306
+
+slave_for_mydatabase:
+  adapter: mysql
+  database: mydatabase
+  username: myuser
+  password: mypassword
+  socket: /var/lib/mysql/mysql.sock
+</code>
+</pre>
+
+Just use the regular YAML format to specify your slave database, it could equally well be on
+another server as the local example given above.
+
+h2. Documentation
+
+"http://rdoc.info/projects/sdsykes/read_from_slave":http://rdoc.info/projects/sdsykes/read_from_slave
 
 h2. Todo
 
-* Support pool of multiple slaves 
-
+* Support a pool of multiple slaves
+* Address concerns of replication lag, override reload
 
 h2. References
 
