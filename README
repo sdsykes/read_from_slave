@@ -10,24 +10,24 @@ Configuration
 
 In config/environments/production.rb (for instance)
 
-config.gem "sdsykes-read_from_slave", :lib=>"read_from_slave"
+  config.gem "sdsykes-read_from_slave", :lib=>"read_from_slave"
 
 In config/database.yml
 
-production:
-  adapter: mysql
-  database: mydatabase
-  username: myuser
-  password: mypassword
-  host: my.main.database.server.com
-  port: 3306
+  production:
+    adapter: mysql
+    database: mydatabase
+    username: myuser
+    password: mypassword
+    host: my.main.database.server.com
+    port: 3306
 
-slave_for_mydatabase:
-  adapter: mysql
-  database: mydatabase
-  username: myuser
-  password: mypassword
-  socket: /var/lib/mysql/mysql.sock
+  slave_for_mydatabase:
+    adapter: mysql
+    database: mydatabase
+    username: myuser
+    password: mypassword
+    socket: /var/lib/mysql/mysql.sock
 
 Just use the regular YAML format to specify your slave database, it could equally well be on
 another server as the local example given above.
@@ -43,11 +43,12 @@ Todo
 
 References
 
-* "Masochism":http://github.com/technoweenie/masochism/tree/master
-** not thread safe
-** won't work with apps that talk to multiple (master) databases
-* "Acts as readonlyable":http://rubyforge.org/projects/acts-as-with-ro/
-** old, not suitable for Rails 2.x
+"Masochism":http://github.com/technoweenie/masochism/tree/master
+not thread safe
+won't work with apps that talk to multiple (master) databases
+
+"Acts as readonlyable":http://rubyforge.org/projects/acts-as-with-ro/
+old, not suitable for Rails 2.x
 
 
 
