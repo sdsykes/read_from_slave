@@ -53,7 +53,11 @@ module ReadFromSlave
       Thread.current[:read_from_slave] = true
       find_by_sql_without_read_from_slave(sql)
     ensure
-      Thread.current[:read_from_slave] = false      
+      if Thread.current[:read_from_slave_connection]
+        @slave_model.connection_pool.checkin Thread.current[:read_from_slave_connection]
+        Thread.current[:read_from_slave_connection] = false
+      end
+      Thread.current[:read_from_slave] = false
     end
 
     def connection_with_read_from_slave
@@ -69,7 +73,7 @@ module ReadFromSlave
     # no slave is configured
     #
     def slave_connection
-      (@slave_model || slave_model).connection_without_read_from_slave
+      Thread.current[:read_from_slave_connection] ||= (@slave_model || slave_model).connection_pool.checkout
     end
 
     # Returns an AR model class that has a connection to the appropriate slave db

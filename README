@@ -2,6 +2,8 @@ Read_from_slave
 
 Read_from_slave for Rails enables database reads from a slave database, while writes continue to go to the master
 
+Read_from_slave will work with Rails 2.2 and above.
+
 Installation
 
 sudo gem install sdsykes-read_from_slave
