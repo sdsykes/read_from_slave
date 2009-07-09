@@ -34,6 +34,23 @@ In config/database.yml
 Just use the regular YAML format to specify your slave database, it could equally well be on
 another server as the local example given above.
 
+Phusion Passenger
+
+Note if you are using Passenger, you need to make sure that the slave database is reconnected
+if there is any chance that it was accessed before the spawner forks.  In my case it is because
+I access the database during the construction of routes.
+
+The safest thing to do is to have something like this in your production.rb or environment.rb:
+
+  PhusionPassenger.on_event(:starting_worker_process) do |forked|
+    if forked
+      # We're in smart spawning mode.                                                               
+      ActiveRecord::Base.establish_slave_connections
+    else
+      # We're in conservative spawning mode. We don't need to do anything.                          
+    end
+  end
+
 Documentation
 
 http://rdoc.info/projects/sdsykes/read_from_slave
@@ -52,6 +69,8 @@ won't work with apps that talk to multiple (master) databases
 "Acts as readonlyable":http://rubyforge.org/projects/acts-as-with-ro/
 old, not suitable for Rails 2.x
 
+"master_slave_adapter":http://github.com/mauricio/master_slave_adapter/tree/master
+similar to read_from_slave, but adapter based approach
 
 
 (c) 2009 Stephen Sykes

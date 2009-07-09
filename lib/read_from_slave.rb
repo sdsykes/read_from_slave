@@ -34,12 +34,17 @@
 # ** won't work with apps that talk to multiple (master) databases
 # * "Acts as readonlyable":http://rubyforge.org/projects/acts-as-with-ro/
 # ** old, not suitable for Rails 2.x
+# * "master_slave_adapter":http://github.com/mauricio/master_slave_adapter/tree/master
+# ** similar to read_from_slave, but adapter based approach
 #
 module ReadFromSlave
   class << self
     def install!
-      ActiveRecord::Base.extend(SingletonMethods)
-      ActiveRecord::Base.class_eval do
+      base = ActiveRecord::Base
+      base.send(:include, InstanceMethods)
+      base.alias_method_chain :reload, :read_from_slave
+      base.extend(SingletonMethods)
+      base.class_eval do
         class << self
           alias_method_chain :find_by_sql, :read_from_slave
           alias_method_chain :connection, :read_from_slave
@@ -47,16 +52,22 @@ module ReadFromSlave
       end
     end
   end
-  
+
+  module InstanceMethods
+    def reload_with_read_from_slave
+      Thread.current[:read_from_slave] = :reload
+      reload_without_read_from_slave
+    end
+  end
+
   module SingletonMethods
+
+    @@slave_models = {}
+
     def find_by_sql_with_read_from_slave(sql)
-      Thread.current[:read_from_slave] = true
+      Thread.current[:read_from_slave] = (Thread.current[:read_from_slave] != :reload)
       find_by_sql_without_read_from_slave(sql)
     ensure
-      if Thread.current[:read_from_slave_connection]
-        @slave_model.connection_pool.checkin Thread.current[:read_from_slave_connection]
-        Thread.current[:read_from_slave_connection] = false
-      end
       Thread.current[:read_from_slave] = false
     end
 
@@ -68,43 +79,50 @@ module ReadFromSlave
         normal_connection
       end
     end
-    
-    # Returns a connection to the slave database, or to the regular database if
-    # no slave is configured
-    #
+
+    # Returns a connection to the slave database, or to the regular database if                     
+    # no slave is configured                                                                        
+    #                                                                                               
     def slave_connection
-      Thread.current[:read_from_slave_connection] ||= (@slave_model || slave_model).connection_pool.checkout
+      (@slave_model || slave_model).connection_without_read_from_slave
     end
 
-    # Returns an AR model class that has a connection to the appropriate slave db
-    #
+
+    # Returns an AR model class that has a connection to the appropriate slave db                   
+    #                                                                                               
     def slave_model
-      slave_model_name = "ReadFromSlaveFor_#{master_database_name}"
-      @@slave_models ||= {}
-      unless @@slave_models[slave_model_name]
-        @@slave_models[slave_model_name] = eval %{
+      db_name = master_database_name
+      unless @@slave_models[db_name]
+        slave_model_name = "ReadFromSlaveFor_#{db_name}"
+        @@slave_models[db_name] = eval %{
           class #{slave_model_name} < ActiveRecord::Base
             self.abstract_class = true
-            use_slave_db_for('#{master_database_name}')
+            establish_slave_connection_for('#{db_name}')
           end
           #{slave_model_name}
         }
       end
-      @slave_model = @@slave_models[slave_model_name]
+      @slave_model = @@slave_models[db_name]
     end
 
-    # Returns the name of the database in use, as given in the database.yml file
-    #
+    # Returns the name of the database in use, as given in the database.yml file                    
+    #                                                                                               
     def master_database_name
       connection_without_read_from_slave.instance_variable_get(:@config)[:database]
     end
 
-    # Establishes a connection to the slave database that is configured for
-    # the database name provided
-    #
-    def use_slave_db_for(master)
+    # Establishes a connection to the slave database that is configured for                         
+    # the database name provided                                                                    
+    #                                                                                               
+    def establish_slave_connection_for(master)
       conn_spec = configurations["slave_for_#{master}"]
       establish_connection(conn_spec) if conn_spec
+    end
+
+    def establish_slave_connections
+      @@slave_models.each do |db_name, model|
+        model.establish_slave_connection_for(db_name)
+      end
     end
   end
 end
