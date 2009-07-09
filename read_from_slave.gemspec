@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{read_from_slave}
-  s.version = "0.1.4"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Stephen Sykes"]
-  s.date = %q{2009-07-03}
+  s.date = %q{2009-07-09}
   s.description = %q{Read_from_slave for Rails enables database reads from a slave database, while writes continue to go to the master}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = ["README", "README.textile"]
