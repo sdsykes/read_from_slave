@@ -119,6 +119,9 @@ module ReadFromSlave
       establish_connection(conn_spec) if conn_spec
     end
 
+    # Re-establishes connections to all the slave databases that
+    # have been used so far
+    #
     def establish_slave_connections
       @@slave_models.each do |db_name, model|
         model.establish_slave_connection_for(db_name)
