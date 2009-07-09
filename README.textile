@@ -75,7 +75,6 @@ h2. Documentation
 h2. Todo
 
 * Support a pool of multiple slaves
-* Address concerns of replication lag, override reload
 
 h2. References
 

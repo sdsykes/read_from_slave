@@ -58,7 +58,6 @@ http://rdoc.info/projects/sdsykes/read_from_slave
 Todo
 
 * Support a pool of multiple slaves
-* Address concerns of replication lag, override reload
 
 References
 
