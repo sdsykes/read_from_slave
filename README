@@ -36,9 +36,10 @@ another server as the local example given above.
 
 Phusion Passenger
 
-Note if you are using Passenger, you need to make sure that the slave database is reconnected
-if there is any chance that it was accessed before the spawner forks.  In my case it is because
-I access the database during the construction of routes.
+Note that if you are using Passenger, you need to make sure that the slave database is reconnected
+if there is any chance that it was accessed before the spawner forks.  This could be because
+database was accessed during the generation of routes, or perhaps if you are using the has_many_polymorphs
+gem.
 
 The safest thing to do is to have something like this in your production.rb or environment.rb:
 

@@ -120,7 +120,8 @@ module ReadFromSlave
     end
 
     # Re-establishes connections to all the slave databases that
-    # have been used so far
+    # have been used so far.  Use this in your 
+    # PhusionPassenger.on_event(:starting_worker_process) block if required.
     #
     def establish_slave_connections
       @@slave_models.each do |db_name, model|
