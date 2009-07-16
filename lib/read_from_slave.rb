@@ -36,6 +36,10 @@
 # ** old, not suitable for Rails 2.x
 # * "master_slave_adapter":http://github.com/mauricio/master_slave_adapter/tree/master
 # ** similar to read_from_slave, but adapter based approach
+# * "multi_db":http://github.com/schoefmax/multi_db/tree/master
+# ** another one, proxy connection approach
+# ** looks like it won't work with apps that talk to multiple (master) databases
+# ** more complex than read_from_slave
 #
 module ReadFromSlave
   class << self
