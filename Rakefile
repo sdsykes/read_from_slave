@@ -1,4 +1,17 @@
 require 'rake'
+require 'rake/testtask'
+require 'test/helper'
+
+task :default => [:test_with_active_record]
+
+task :test => :default
+
+Rake::TestTask.new(:test_with_active_record) do |t|
+  t.libs << AR_TEST_SUITE << ReadFromSlave::Test.connection
+  t.test_files = ReadFromSlave::Test.active_record_test_files()
+  t.ruby_opts = ["-r #{File.join( File.dirname(__FILE__), 'test', 'setup')}"]
+  t.verbose = true
+end
 
 begin
   require 'jeweler'

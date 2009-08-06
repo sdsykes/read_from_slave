@@ -58,9 +58,9 @@ module ReadFromSlave
   end
 
   module InstanceMethods
-    def reload_with_read_from_slave
+    def reload_with_read_from_slave(options = nil)
       Thread.current[:read_from_slave] = :reload
-      reload_without_read_from_slave
+      reload_without_read_from_slave(options)
     end
   end
 
@@ -96,17 +96,21 @@ module ReadFromSlave
     #                                                                                               
     def slave_model
       db_name = master_database_name
-      unless @@slave_models[db_name]
-        slave_model_name = "ReadFromSlaveFor_#{db_name}"
-        @@slave_models[db_name] = eval %{
-          class #{slave_model_name} < ActiveRecord::Base
-            self.abstract_class = true
-            establish_slave_connection_for('#{db_name}')
-          end
-          #{slave_model_name}
-        }
+      if slave_config_for(db_name)
+        unless @@slave_models[db_name]
+          slave_model_name = "ReadFromSlaveFor_#{db_name}"
+          @@slave_models[db_name] = eval %{
+            class #{slave_model_name} < ActiveRecord::Base
+              self.abstract_class = true
+              establish_slave_connection_for('#{db_name}')
+            end
+            #{slave_model_name}
+          }
+        end
+        @slave_model = @@slave_models[db_name]
+      else
+        @slave_model = self
       end
-      @slave_model = @@slave_models[db_name]
     end
 
     # Returns the name of the database in use, as given in the database.yml file                    
@@ -115,11 +119,18 @@ module ReadFromSlave
       connection_without_read_from_slave.instance_variable_get(:@config)[:database]
     end
 
+    # Returns the config for the associated slave database for this master, 
+    # as given in the database.yml file                    
+    #                                                                                               
+    def slave_config_for(master)
+      configurations["slave_for_#{master}"]
+    end
+
     # Establishes a connection to the slave database that is configured for                         
     # the database name provided                                                                    
     #                                                                                               
     def establish_slave_connection_for(master)
-      conn_spec = configurations["slave_for_#{master}"]
+      conn_spec = slave_config_for(master)
       establish_connection(conn_spec) if conn_spec
     end
 
