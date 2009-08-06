@@ -68,14 +68,28 @@ end
 </code>
 </pre>
 
-
 h2. Documentation
 
 "http://rdoc.info/projects/sdsykes/read_from_slave":http://rdoc.info/projects/sdsykes/read_from_slave
 
+h2. Tests
+
+Clone the git repository, and you can run the entire ActiveRecord test suite with read_from_slave installed by typing rake test.
+
+<pre>
+<code>
+$ rake test
+...
+Finished in 43.358152 seconds.
+
+2029 tests, 6620 assertions, 0 failures, 0 errors
+</code>
+</pre>
+
 h2. Todo
 
 * Support a pool of multiple slaves
+* Write specific tests for slave dbs
 
 h2. References
 
