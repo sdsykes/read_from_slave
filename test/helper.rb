@@ -1,24 +1,78 @@
 require File.join(File.dirname(__FILE__), 'setup')
-require 'rubygems'
 require 'mocha'
 require 'active_support/test_case'
 
 module ReadFromSlave
   class Test
-    class << self    
+    class << self
+
       def setup
         setup_constants
-        setup_config
-      end
-
-      def active_record_test_files
-        glob("#{AR_TEST_SUITE}/cases/**/*_test.rb").sort
+        make_sqlite_config
+        make_sqlite_connection
+        load_models
+        load(SCHEMA_ROOT + "/schema.rb")
+        require 'test/unit'
       end
 
       def test_files
         glob("#{File.dirname(__FILE__)}/**/*_test.rb")
       end
+
+      def test_model_files
+        %w{course}
+      end
+
+      private
+
+      def setup_constants
+        set_constant('TEST_ROOT') {File.expand_path(File.dirname(__FILE__))}
+        set_constant('SCHEMA_ROOT') {TEST_ROOT + "/schema"}
+      end
       
+      def make_sqlite_config
+        ActiveRecord::Base.configurations = {
+          'rfs' => {
+            :adapter => 'sqlite3',
+            :database => 'test_db',
+            :timeout => 5000
+          },
+          'slave_for_test_db' => {
+            :adapter => 'sqlite3',
+            :database => 'test_db',
+            :timeout => 5000
+          }
+        }
+      end
+      
+      def load_models
+        test_model_files.each {|f| require File.join(File.dirname(__FILE__), "models", f)}
+      end
+
+      def make_sqlite_connection
+        ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['rfs'])
+      end
+      
+      def set_constant(constant)
+        Object.const_set(constant, yield) unless Object.const_defined?(constant)
+      end
+      
+      def glob(pattern)
+        Dir.glob(pattern)
+      end
+    end
+  end
+  
+  class ActiveRecordTest < Test
+    class << self
+      def setup
+        setup_constants
+      end
+      
+      def test_files
+        glob("#{AR_TEST_SUITE}/cases/**/*_test.rb").sort
+      end
+
       def connection
         File.join(AR_TEST_SUITE, 'connections', 'native_mysql')
       end
@@ -26,20 +80,8 @@ module ReadFromSlave
       private
 
       def setup_constants
-        set_constant('MYSQL_DB_USER'){'rails'}
-        set_constant('AR_TEST_SUITE') do 
-          find_active_record_test_suite()
-        end
-      end
-      
-      def setup_config
-        unless Object.const_defined?('MIGRATIONS_ROOT')
-          require "#{::AR_TEST_SUITE}/config"
-        end
-      end
-
-      def set_constant(constant)
-        Object.const_set(constant, yield) unless Object.const_defined?(constant)
+        set_constant('MYSQL_DB_USER') {'rails'}
+        set_constant('AR_TEST_SUITE') {find_active_record_test_suite}
       end
  
       def find_active_record_test_suite
@@ -48,12 +90,8 @@ module ReadFromSlave
         ts << 'test'
         ts.join('/')
       end
-
-      def glob(pattern)
-        Dir.glob(pattern)
-      end
     end
+
+    AR_TEST_SUITE = find_active_record_test_suite
   end
 end
-
-ReadFromSlave::Test.setup

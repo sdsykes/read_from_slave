@@ -78,8 +78,10 @@ module ReadFromSlave
     def connection_with_read_from_slave
       normal_connection = connection_without_read_from_slave
       if Thread.current[:read_from_slave] && normal_connection.open_transactions == 0
+        Thread.current[:read_from_slave_uses] = :slave  # for testing use
         slave_connection
       else
+        Thread.current[:read_from_slave_uses] = :master
         normal_connection
       end
     end
@@ -128,7 +130,7 @@ module ReadFromSlave
 
     # Establishes a connection to the slave database that is configured for                         
     # the database name provided                                                                    
-    #                                                                                               
+    #                                       
     def establish_slave_connection_for(master)
       conn_spec = slave_config_for(master)
       establish_connection(conn_spec) if conn_spec
