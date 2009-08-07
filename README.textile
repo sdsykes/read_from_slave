@@ -74,22 +74,27 @@ h2. Documentation
 
 h2. Tests
 
-Clone the git repository, and you can run the entire ActiveRecord test suite with read_from_slave installed by typing rake test.
+Clone the git repository, and you can run the read_from_slave tests or entire ActiveRecord test suite to prove that read_from_slave works correctly.
 
 <pre>
 <code>
 $ rake test
-...
-Finished in 43.358152 seconds.
+...snip..
+Finished in 0.046365 seconds.
 
-2029 tests, 6620 assertions, 0 failures, 0 errors
+7 tests, 7 assertions, 0 failures, 0 errors
+
+$ rake test_with_active_record
+...snip...
+Finished in 51.904306 seconds.
+
+2057 tests, 6685 assertions, 0 failures, 0 errors
 </code>
 </pre>
 
 h2. Todo
 
 * Support a pool of multiple slaves
-* Write specific tests for slave dbs
 
 h2. References
 

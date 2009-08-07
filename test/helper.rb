@@ -1,5 +1,4 @@
 require File.join(File.dirname(__FILE__), 'setup')
-require 'mocha'
 require 'active_support/test_case'
 
 module ReadFromSlave
