@@ -56,6 +56,22 @@ Documentation
 
 http://rdoc.info/projects/sdsykes/read_from_slave
 
+Tests
+
+Clone the git repository, and you can run the read_from_slave tests or entire ActiveRecord test suite to prove that read_from_slave works correctly.
+
+  $ rake test
+  ...snip..
+  Finished in 0.046365 seconds.
+  
+  7 tests, 7 assertions, 0 failures, 0 errors
+  
+  $ rake test_with_active_record
+  ...snip...
+  Finished in 51.904306 seconds.
+  
+  2057 tests, 6685 assertions, 0 failures, 0 errors
+
 Todo
 
 * Support a pool of multiple slaves
