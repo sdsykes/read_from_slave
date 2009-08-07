@@ -2,15 +2,15 @@
 
 Gem::Specification.new do |s|
   s.name = %q{read_from_slave}
-  s.version = "0.2.0"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Stephen Sykes"]
-  s.date = %q{2009-07-09}
+  s.date = %q{2009-08-07}
   s.description = %q{Read_from_slave for Rails enables database reads from a slave database, while writes continue to go to the master}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = ["README", "README.textile"]
-  s.files = ["Rakefile", "README", "README.textile", "VERSION.yml", "lib/read_from_slave.rb", "test/test.rb"]
+  s.files = ["Rakefile", "README", "README.textile", "VERSION.yml", "lib/read_from_slave.rb", "test/active_record_setup.rb", "test/helper.rb", "test/models", "test/models/course.rb", "test/read_from_slave_test.rb", "test/schema", "test/schema/schema.rb", "test/setup.rb", "test/test.rb"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/sdsykes/read_from_slave}
   s.rdoc_options = ["--inline-source", "--charset=UTF-8"]
