@@ -8,7 +8,7 @@ h2. Installation
 
 <pre>
 <code>
-sudo gem install sdsykes-read_from_slave
+sudo gem install read_from_slave
 </code>
 </pre>
 
@@ -18,7 +18,7 @@ In config/environments/production.rb (for instance)
 
 <pre>
 <code>
-config.gem "sdsykes-read_from_slave", :lib=>"read_from_slave"
+config.gem "read_from_slave", :lib=>"read_from_slave"
 </code>
 </pre>
 
