@@ -3,10 +3,14 @@
 # To use read_from_slave you must install the gem, configure the gem in your environment file,
 # and setup your database.yml file with an entry for your slave database.
 #
+#   gem install read_from_slave
+#
+# Read_from_slave is compatible with Rails 2.2.x and Rails 3
+#
 # === Configuration
 # In config/environments/production.rb (for instance)
 #
-#   config.gem "sdsykes-read_from_slave", :lib=>"read_from_slave"
+#   config.gem "read_from_slave"
 #
 # In config/database.yml  
 #
@@ -47,11 +51,24 @@ module ReadFromSlave
       base = ActiveRecord::Base
       base.send(:include, InstanceMethods)
       base.alias_method_chain :reload, :read_from_slave
-      base.extend(SingletonMethods)
+      base.extend(ClassMethods)
       base.class_eval do
         class << self
           alias_method_chain :find_by_sql, :read_from_slave
           alias_method_chain :connection, :read_from_slave
+        end
+      end
+      
+      begin
+        calculation_base = ActiveRecord::Relation  # rails 3
+        calculation_base.send(:include, CalculationMethod)
+        calculation_base.alias_method_chain :calculate, :read_from_slave
+      rescue NameError  # rails 2
+        base.extend(CalculationMethod)
+        base.class_eval do
+          class << self
+            alias_method_chain :calculate, :read_from_slave
+          end
         end
       end
     end
@@ -64,7 +81,7 @@ module ReadFromSlave
     end
   end
 
-  module SingletonMethods
+  module ClassMethods
 
     @@slave_models = {}
 
@@ -144,6 +161,15 @@ module ReadFromSlave
       @@slave_models.each do |db_name, model|
         model.establish_slave_connection_for(db_name)
       end
+    end
+  end
+  
+  module CalculationMethod
+    def calculate_with_read_from_slave(*args)
+      Thread.current[:read_from_slave] = true
+      calculate_without_read_from_slave(*args)
+    ensure
+      Thread.current[:read_from_slave] = false      
     end
   end
 end

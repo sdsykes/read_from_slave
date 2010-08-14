@@ -42,4 +42,10 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
     ActiveRecord::Base.establish_slave_connections
     assert_equal conn, Course.connection_without_read_from_slave
   end
+  
+  test "count should use the slave" do
+    Course.create(:name=>"Saw playing")
+    assert_equal 1, Course.count
+    assert_equal :slave, Thread.current[:read_from_slave_uses]
+  end
 end
