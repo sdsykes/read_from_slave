@@ -1,6 +1,6 @@
 Read_from_slave
 
-Read_from_slave for Rails enables database reads from a slave database, while writes continue to go to the master
+Read_from_slave for Rails enables database reads from one or more slave databases, while writes continue to go to the master
 
 Read_from_slave will work with Rails 2.2 and above, including Rails 3 versions.
 
@@ -16,23 +16,81 @@ In config/environments/production.rb (for instance)
 
 In config/database.yml
 
-  production:
-    adapter: mysql
-    database: mydatabase
-    username: myuser
-    password: mypassword
-    host: my.main.database.server.com
-    port: 3306
+   production:
+     adapter: mysql
+     database: mydatabase
+     username: myuser
+     password: mypassword
+     host: my.main.database.server.com
+     port: 3306
+     slaves:
+       primary_slave:  slave_for_reads
+       slave_2:  slave_for_reporting
 
-  slave_for_mydatabase:
-    adapter: mysql
-    database: mydatabase
-    username: myuser
-    password: mypassword
-    socket: /var/lib/mysql/mysql.sock
+   slave_for_reads:
+     adapter: mysql
+     database: mydatabase
+     username: myuser
+     password: mypassword
+     socket: /var/lib/mysql/mysql.sock
+
+   slave_for_reporting:
+     adapter: mysql
+     database: mydatabase
+     username: myuser
+     password: mypassword
+     host: my.slave.database.server.com
 
 Just use the regular YAML format to specify your slave database, it could equally well be on
 another server as the local example given above.
+
+In the example above, primary_slave and slave_2 are names that are used to generate methods you can use to specify which slave to use.
+slave_for_reads and slave_for_reporting is the yaml key that is used to make the connection to your slave database.
+
+You can have any number of slaves configured.  To connect to the slaves:
+
+ActiveRecord::Base.with_primary_slave do
+    User.last
+end
+
+ActiveRecord::Base.with_slave_2 do
+    User.last
+end
+
+with_primary_slave and with_slave_2 are dynamically created based on the keys provided in the yaml file.  Everything
+inside the block with read from the corresponding slave database specified in the yaml file.
+
+You must have one slave with the primary_slave key.  By default, all the reads will occur on the primary_slave,
+in the example above, and not require you to use the with_primary_slave method.  You actually never need to use
+the with_primary_slave method as that slave will alwaysbe used if not inside a with... method block.  So if you only have
+1 slave, you don't ever need to worry about the with... methods.
+
+If you have multiple slaves, you will want to make sure you specify slave configurations for each environment, even if you
+don't have slaves in every environment.
+
+development:
+     adapter: mysql
+     database: mydatabase
+     username: myuser
+     password: mypassword
+     host: my.main.database.server.com
+     port: 3306
+     slaves:
+       primary_slave:  development
+       slave_2:  development
+
+The reason is, your code will have with_primary_slave and with_slave_2 methods because that is what you need in production,
+but you will get undefined method errors in development because they won't be generated unless your development configuration
+specifies slaves.  Just specifying the slave keys back to the development configuration should serve your needs.
+
+You may have a need where you don't actually want all of your reads to be on the slave.  You may want to be much more
+selective in what you put on the slave.  For instance, perhaps you want everything on the master except large reports.
+You can change the default behavior of read_from_slave by setting:
+
+ReadFromSlave.all_reads_on_slave = false
+
+in your environment.rb file.  This will make all reads on the master by default and reads will only be on the slave inside
+the with... method blocks.
 
 Phusion Passenger
 
@@ -45,10 +103,10 @@ The safest thing to do is to have something like this in your production.rb or e
 
   PhusionPassenger.on_event(:starting_worker_process) do |forked|
     if forked
-      # We're in smart spawning mode.                                                               
+      # We're in smart spawning mode.
       ActiveRecord::Base.establish_slave_connections
     else
-      # We're in conservative spawning mode. We don't need to do anything.                          
+      # We're in conservative spawning mode. We don't need to do anything.
     end
   end
 
@@ -63,18 +121,14 @@ Clone the git repository, and you can run the read_from_slave tests or entire Ac
   $ rake test
   ...snip..
   Finished in 0.046365 seconds.
-  
+
   7 tests, 7 assertions, 0 failures, 0 errors
-  
+
   $ rake test_with_active_record
   ...snip...
   Finished in 51.904306 seconds.
-  
+
   2057 tests, 6685 assertions, 0 failures, 0 errors
-
-Todo
-
-* Support a pool of multiple slaves
 
 References
 

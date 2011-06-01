@@ -12,6 +12,7 @@ module ReadFromSlave
         load_models
         load(SCHEMA_ROOT + "/schema.rb")
         require 'test/unit'
+        require File.join(File.dirname(__FILE__), '..', 'lib', 'read_from_slave')
       end
 
       def test_files
@@ -25,49 +26,58 @@ module ReadFromSlave
       private
 
       def setup_constants
-        set_constant('TEST_ROOT') {File.expand_path(File.dirname(__FILE__))}
-        set_constant('SCHEMA_ROOT') {TEST_ROOT + "/schema"}
+        set_constant('TEST_ROOT') { File.expand_path(File.dirname(__FILE__)) }
+        set_constant('SCHEMA_ROOT') { TEST_ROOT + "/schema" }
       end
-      
+
       def make_sqlite_config
         ActiveRecord::Base.configurations = {
-          'rfs' => {
-            :adapter => 'sqlite3',
-            :database => 'test_db',
-            :timeout => 5000
-          },
-          'slave_for_test_db' => {
-            :adapter => 'sqlite3',
-            :database => 'test_db',
-            :timeout => 5000
-          }
+            'rfs' => {
+                :adapter => 'sqlite3',
+                :database => 'test_db',
+                :timeout => 5000,
+                :slaves =>
+                    {:primary_slave => 'primary_slave',
+                     :slave_2 => 'slave_2'
+                    }
+            },
+            'primary_slave' => {
+                :adapter => 'sqlite3',
+                :database => 'test_db',
+                :timeout => 5000
+            },
+            'slave_2' => {
+                :adapter => 'sqlite3',
+                :database => 'test_db',
+                :timeout => 5000
+            }
         }
       end
-      
+
       def load_models
-        test_model_files.each {|f| require File.join(File.dirname(__FILE__), "models", f)}
+        test_model_files.each { |f| require File.join(File.dirname(__FILE__), "models", f) }
       end
 
       def make_sqlite_connection
         ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['rfs'])
       end
-      
+
       def set_constant(constant)
         Object.const_set(constant, yield) unless Object.const_defined?(constant)
       end
-      
+
       def glob(pattern)
         Dir.glob(pattern)
       end
     end
   end
-  
+
   class ActiveRecordTest < Test
     class << self
       def setup
         setup_constants
       end
-      
+
       def test_files
         glob("#{AR_TEST_SUITE}/cases/**/*_test.rb").sort
       end
@@ -79,10 +89,10 @@ module ReadFromSlave
       private
 
       def setup_constants
-        set_constant('MYSQL_DB_USER') {'rails'}
-        set_constant('AR_TEST_SUITE') {find_active_record_test_suite}
+        set_constant('MYSQL_DB_USER') { 'rails' }
+        set_constant('AR_TEST_SUITE') { find_active_record_test_suite }
       end
- 
+
       def find_active_record_test_suite
         ts = ($:).grep(/activerecord/).last.split('/')
         ts.pop
