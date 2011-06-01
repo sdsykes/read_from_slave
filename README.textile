@@ -34,8 +34,8 @@ In config/database.yml
      host: my.main.database.server.com
      port: 3306
      slaves:
-       slave_1:  slave_for_reads
-       slave_2:  slave_for_repording
+       primary_slave:  slave_for_reads
+       slave_2:  slave_for_reporting
 
    slave_for_reads:
      adapter: mysql
@@ -44,7 +44,7 @@ In config/database.yml
      password: mypassword
      socket: /var/lib/mysql/mysql.sock
 
-   slave_for_repording:
+   slave_for_reporting:
      adapter: mysql
      database: mydatabase
      username: myuser
@@ -56,14 +56,14 @@ In config/database.yml
 Just use the regular YAML format to specify your slave database, it could equally well be on
 another server as the local example given above.
 
-In the example above, slave_1 and slave_2 are names that are used to generate methods you can use to specify which slave to use.
+In the example above, primary_slave and slave_2 are names that are used to generate methods you can use to specify which slave to use.
 slave_for_reads and slave_for_reporting is the yaml key that is used to make the connection to your slave database.
 
 You can have any number of slaves configured.  To connect to the slaves:
 
 <pre>
 <code>
-ActiveRecord::Base.with_slave_1 do
+ActiveRecord::Base.with_primary_slave do
     User.last
 end
 
@@ -73,13 +73,13 @@ end
 </pre>
 </code>
 
-with_slave_1 and with_slave_2 are dynmaically created based on the keys provided in the yaml file.  Everything
+with_primary_slave and with_slave_2 are dynamically created based on the keys provided in the yaml file.  Everything
 inside the block with read from the corresponding slave database specified in the yaml file.
 
-By default, all the reads will occur on the first slave specified, slave_1, in the example above, and not require
-you to use the with_slave_1 method.  You actually never need to use the with_slave_1 method as that slave will always
-be used if not inside a with... method block.  So if you only have 1 slave, you don't ever need to worry about the with...
-methods.
+You must have one slave with the primary_slave key.  By default, all the reads will occur on the primary_slave,
+in the example above, and not require you to use the with_primary_slave method.  You actually never need to use
+the with_primary_slave method as that slave will alwaysbe used if not inside a with... method block.  So if you only have
+1 slave, you don't ever need to worry about the with... methods.
 
 If you have multiple slaves, you will want to make sure you specify slave configurations for each environment, even if you
 don't have slaves in every environment.
@@ -94,18 +94,18 @@ development:
      host: my.main.database.server.com
      port: 3306
      slaves:
-       slave_1:  development
+       primary_slave:  development
        slave_2:  development
 </pre>
 </code>
 
-The reason is, your code will have with_slave_1 and with_slave_2 methods because that what you need in production,
+The reason is, your code will have with_primary_slave and with_slave_2 methods because that is what you need in production,
 but you will get undefined method errors in development because they won't be generated unless your development configuration
 specifies slaves.  Just specifying the slave keys back to the development configuration should serve your needs.
 
 You may have a need where you don't actually want all of your reads to be on the slave.  You may want to be much more
-selective in what you put on the slave.  For instance perhaps you want everything on the master except large reports.
-You can change the default behavior of read_from slave by setting:
+selective in what you put on the slave.  For instance, perhaps you want everything on the master except large reports.
+You can change the default behavior of read_from_slave by setting:
 
 <pre>
 <code>
@@ -161,10 +161,6 @@ Finished in 51.904306 seconds.
 2057 tests, 6685 assertions, 0 failures, 0 errors
 </code>
 </pre>
-
-h2. Todo
-
-* Support a pool of multiple slaves
 
 h2. References
 

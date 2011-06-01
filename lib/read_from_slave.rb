@@ -23,7 +23,7 @@
 #     port: 3306
 #     slaves:
 #       slave_1:  slave_for_reads
-#       slave_2:  slave_for_repording
+#       slave_2:  slave_for_reporting
 #
 #   slave_for_reads:
 #     adapter: mysql
@@ -32,7 +32,7 @@
 #     password: mypassword
 #     socket: /var/lib/mysql/mysql.sock
 #
-#   slave_for_repording:
+#   slave_for_reporting:
 #     adapter: mysql
 #     database: mydatabase
 #     username: myuser
@@ -172,7 +172,6 @@ module ReadFromSlave
     # Returns an AR model class that has a connection to the appropriate slave db
     #
     def slave_model(slave_config)
-      #db_name = master_database_name
       if slave_config_for(slave_config)
         unless @@slave_models[slave_config]
           slave_model_name = "ReadFromSlaveFor_#{slave_config}"
@@ -203,12 +202,12 @@ module ReadFromSlave
 
     # Returns the first slave defined in database.yml which will be used by default for reads
     def primary_slave_config
-      slaves.values.first
+      slaves[primary_slave_name]
     end
 
     # Returns the first slave defined in database.yml which will be used by default for reads
     def primary_slave_name
-      slaves.keys.first
+      :primary_slave
     end
 
     # Returns the config for the associated slave database for this master,
