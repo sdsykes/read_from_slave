@@ -114,7 +114,7 @@ The safest thing to do is to have something like this in your production.rb or e
 
 Documentation
 
-http://rdoc.info/projects/sdsykes/read_from_slave
+http://rdoc.info/github/sdsykes/read_from_slave/master/frames
 
 Tests
 

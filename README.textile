@@ -142,7 +142,7 @@ end
 
 h2. Documentation
 
-"http://rdoc.info/projects/sdsykes/read_from_slave":http://rdoc.info/projects/sdsykes/read_from_slave
+"http://rdoc.info/github/sdsykes/read_from_slave/master/frames":http://rdoc.info/github/sdsykes/read_from_slave/master/frames
 
 h2. Tests
 
