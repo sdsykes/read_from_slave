@@ -25,7 +25,7 @@ In config/database.yml
      port: 3306
      slaves:
        slave_1:  slave_for_reads
-       slave_2:  slave_for_repording
+       slave_2:  slave_for_reporting
 
    slave_for_reads:
      adapter: mysql
@@ -34,7 +34,7 @@ In config/database.yml
      password: mypassword
      socket: /var/lib/mysql/mysql.sock
 
-   slave_for_repording:
+   slave_for_reporting:
      adapter: mysql
      database: mydatabase
      username: myuser
