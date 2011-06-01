@@ -4,7 +4,7 @@ ReadFromSlave::Test.setup
 
 class ReadFromSlaveTest < ActiveSupport::TestCase
   test "slave connection should be different from normal connection" do
-    assert_not_equal Course.connection_without_read_from_slave, Course.slave_connection
+    assert_not_equal Course.connection_without_read_from_slave, Course.slave_connection("slave_for_test_db")
   end
 
   test "should be able to write and read from database" do
@@ -21,7 +21,7 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
   test "should read from slave" do
     Course.create(:name=>"Saw playing")
     x = Course.find(:first)
-    assert_equal :slave, Thread.current[:read_from_slave_uses]
+    assert_equal :slave_1, Thread.current[:read_from_slave_uses]
   end
 
   test "should reload from master" do
@@ -32,9 +32,9 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
   end
 
   test "should get new slave connection when calling establish_slave_connections" do
-    conn = Course.slave_connection
+    conn = Course.slave_connection("slave_for_test_db")
     ActiveRecord::Base.establish_slave_connections
-    assert_not_equal conn, Course.slave_connection
+    assert_not_equal conn, Course.slave_connection("slave_for_test_db")
   end
 
   test "should not get new master connection when calling establish_slave_connections" do
@@ -46,6 +46,6 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
   test "count should use the slave" do
     Course.create(:name=>"Saw playing")
     assert_equal 1, Course.count
-    assert_equal :slave, Thread.current[:read_from_slave_uses]
+    assert_equal :slave_1, Thread.current[:read_from_slave_uses]
   end
 end

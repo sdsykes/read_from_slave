@@ -7,8 +7,6 @@ module ReadFromSlave
 
       def setup
         setup_constants
-        make_sqlite_config
-        make_sqlite_connection
         load_models
         load(SCHEMA_ROOT + "/schema.rb")
         require 'test/unit'
@@ -28,28 +26,9 @@ module ReadFromSlave
         set_constant('TEST_ROOT') {File.expand_path(File.dirname(__FILE__))}
         set_constant('SCHEMA_ROOT') {TEST_ROOT + "/schema"}
       end
-      
-      def make_sqlite_config
-        ActiveRecord::Base.configurations = {
-          'rfs' => {
-            :adapter => 'sqlite3',
-            :database => 'test_db',
-            :timeout => 5000
-          },
-          'slave_for_test_db' => {
-            :adapter => 'sqlite3',
-            :database => 'test_db',
-            :timeout => 5000
-          }
-        }
-      end
-      
+            
       def load_models
         test_model_files.each {|f| require File.join(File.dirname(__FILE__), "models", f)}
-      end
-
-      def make_sqlite_connection
-        ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['rfs'])
       end
       
       def set_constant(constant)
