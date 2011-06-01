@@ -4,6 +4,8 @@ h4. Read_from_slave for Rails enables database reads from one or more slave data
 
 Read_from_slave will work with Rails 2.2 and above, including Rails 3 versions.
 
+Note that this version (0.5.x) supports multiple slave databases, but this caused an incompatibility in the configuration - your database.yml file must be updated before you can use this version.
+
 h2. Installation
 
 <pre>
@@ -178,3 +180,4 @@ h2. References
 
 
 (c) 2009 Stephen Sykes
+Thanks to Kevin Tyll for contributing the multiple slave feature
