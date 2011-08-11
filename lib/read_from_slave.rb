@@ -82,6 +82,20 @@ module ReadFromSlave
       end
     end
 
+    def install_with_methods!
+      ActiveRecord::Base.connection.instance_variable_get(:@config)[:slaves].each_key do |slave_name|
+        ActiveRecord::Base.class_eval <<-EOM
+          def self.with_#{slave_name}(&block)
+            Thread.current[:with_#{slave_name}_count] ||= 0
+            Thread.current[:with_#{slave_name}_count] += 1
+            yield
+          ensure
+            Thread.current[:with_#{slave_name}_count] -= 1
+          end
+        EOM
+      end if ActiveRecord::Base.connection.instance_variable_get(:@config)[:slaves]
+    end
+
     def default_to_master!
       base = ActiveRecord::Base
       base.class_eval do
@@ -120,18 +134,6 @@ module ReadFromSlave
     ensure
       Thread.current[:read_from_slave] = false
     end
-
-    ActiveRecord::Base.connection.instance_variable_get(:@config)[:slaves].each_key do |slave_name|
-      eval <<-EOM
-        def with_#{slave_name}(&block)
-          Thread.current[:with_#{slave_name}_count] ||= 0
-          Thread.current[:with_#{slave_name}_count] += 1
-          yield
-        ensure
-          Thread.current[:with_#{slave_name}_count] -= 1
-        end
-      EOM
-    end if ActiveRecord::Base.connection.instance_variable_get(:@config)[:slaves]
 
     def connection_with_slave_db_scope
       slaves.each_key do |slave_name|
@@ -247,3 +249,8 @@ module ReadFromSlave
 end
 
 ReadFromSlave.install!
+if defined? ::Rails::Railtie
+  require 'read_from_slave/railtie'
+else
+  ReadFromSlave.install_with_methods!
+end

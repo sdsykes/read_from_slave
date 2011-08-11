@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{read_from_slave}
-  s.version = "0.5.0"
+  s.version = "0.5.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Stephen Sykes"]
@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION.yml",
      "lib/read_from_slave.rb",
+     "lib/read_from_slave/railtie.rb",
      "test/active_record_setup.rb",
      "test/helper.rb",
      "test/models/course.rb",
