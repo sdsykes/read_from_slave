@@ -128,9 +128,9 @@ module ReadFromSlave
 
     @@slave_models = {}
 
-    def find_by_sql_with_read_from_slave(sql)
+    def find_by_sql_with_read_from_slave(*find_args)
       Thread.current[:read_from_slave] = (Thread.current[:read_from_slave] != :reload)
-      find_by_sql_without_read_from_slave(sql)
+      find_by_sql_without_read_from_slave(*find_args)
     ensure
       Thread.current[:read_from_slave] = false
     end
