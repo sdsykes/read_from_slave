@@ -128,9 +128,9 @@ module ReadFromSlave
 
     @@slave_models = {}
 
-    def find_by_sql_with_read_from_slave(sql)
+    def find_by_sql_with_read_from_slave(*find_args)
       Thread.current[:read_from_slave] = (Thread.current[:read_from_slave] != :reload)
-      find_by_sql_without_read_from_slave(sql)
+      find_by_sql_without_read_from_slave(*find_args)
     ensure
       Thread.current[:read_from_slave] = false
     end
@@ -149,7 +149,7 @@ module ReadFromSlave
       if Thread.current[:read_from_slave] && normal_connection.open_transactions == 0
         slaves.each do |slave_name, slave_config|
           if Thread.current[:"with_#{slave_name}_count"].to_i > 0
-            Thread.current[:read_from_slave_uses] = slave_name  # for testing use
+            Thread.current[:read_from_slave_uses] = slave_name.to_sym  # for testing use
             return slave_connection(slave_config)
           end
         end
@@ -204,7 +204,7 @@ module ReadFromSlave
 
     # Returns the first slave defined in database.yml which will be used by default for reads
     def primary_slave_config
-      slaves[primary_slave_name]
+      slaves.symbolize_keys[primary_slave_name]
     end
 
     # Returns the first slave defined in database.yml which will be used by default for reads
