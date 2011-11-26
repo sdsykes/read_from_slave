@@ -37,7 +37,7 @@ module ReadFromSlave
                 :database => 'test_db',
                 :timeout => 5000,
                 :slaves =>
-                    {:primary_slave => 'primary_slave',
+                    {'primary_slave' => 'primary_slave',
                      :slave_2 => 'slave_2'
                     }
             },
