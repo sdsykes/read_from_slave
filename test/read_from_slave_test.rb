@@ -20,7 +20,7 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
 
   test "should read from slave" do
     Course.create(:name=>"Saw playing")
-    x = Course.find(:first)
+    Course.find(:first)
     assert_equal :primary_slave, Thread.current[:read_from_slave_uses]
   end
 
