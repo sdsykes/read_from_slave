@@ -1,6 +1,6 @@
 require 'rake'
 require 'rake/testtask'
-require 'test/helper'
+require_relative 'test/helper'
 
 task :default => [:test_read_from_slave]
 
