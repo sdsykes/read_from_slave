@@ -73,4 +73,11 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
       assert_equal :slave_2, Thread.current[:read_from_slave_uses]
     end
   end
+
+  test "on_master" do
+    ReadFromSlave.on_master do
+      Course.first
+      assert_equal :master, Thread.current[:read_from_slave_uses]
+    end
+  end
 end

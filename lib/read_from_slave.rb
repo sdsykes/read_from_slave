@@ -115,6 +115,14 @@ module ReadFromSlave
       @@all_reads_on_slave
     end
 
+    def on_master
+      Thread.current[:on_master] = true
+      yield if block_given?
+    rescue
+      raise
+    ensure
+      Thread.current[:on_master] = false
+    end
   end
 
   module InstanceMethods
@@ -129,7 +137,9 @@ module ReadFromSlave
     @@slave_models = {}
 
     def find_by_sql_with_read_from_slave(*find_args)
-      Thread.current[:read_from_slave] = (Thread.current[:read_from_slave] != :reload)
+      reload = (:reload  == Thread.current[:read_from_slave])
+      on_master = Thread.current[:on_master]
+      Thread.current[:read_from_slave] = !(reload || on_master)
       find_by_sql_without_read_from_slave(*find_args)
     ensure
       Thread.current[:read_from_slave] = false
