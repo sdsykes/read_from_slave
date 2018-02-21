@@ -9,7 +9,7 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
 
   test "should be able to write and read from database" do
     Course.create(:name=>"Saw playing")
-    x = Course.find(:first)
+    x = Course.first
     assert_equal "Saw playing", x.name
   end
 
@@ -20,13 +20,13 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
 
   test "should read from slave" do
     Course.create(:name=>"Saw playing")
-    Course.find(:first)
+    Course.first
     assert_equal :primary_slave, Thread.current[:read_from_slave_uses]
   end
 
   test "should reload from master" do
     Course.create(:name=>"Saw playing")
-    x = Course.find(:first)
+    x = Course.first
     x.reload
     assert_equal :master, Thread.current[:read_from_slave_uses]
   end
@@ -42,7 +42,7 @@ class ReadFromSlaveTest < ActiveSupport::TestCase
     ActiveRecord::Base.establish_slave_connections
     assert_equal conn, Course.connection_without_read_from_slave
   end
-  
+
   test "count should use the slave" do
     count = Course.count
     Course.create(:name=>"Saw playing")
