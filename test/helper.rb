@@ -11,7 +11,8 @@ module ReadFromSlave
         make_sqlite_connection
         load_models
         load(SCHEMA_ROOT + "/schema.rb")
-        require 'test/unit'
+        ActiveSupport::TestCase.test_order = :sorted
+        require 'minitest/autorun'
         require File.join(File.dirname(__FILE__), '..', 'lib', 'read_from_slave')
       end
 
