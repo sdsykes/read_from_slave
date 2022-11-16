@@ -59,24 +59,29 @@ module ReadFromSlave
     def install!
       base = ActiveRecord::Base
       base.send(:include, InstanceMethods)
-      base.alias_method_chain :reload, :read_from_slave
+      base.send(:alias_method, :reload_without_read_from_slave, :reload)
+      base.send(:alias_method, :reload, :reload_with_read_from_slave)
       base.extend(ClassMethods)
       base.class_eval do
         class << self
-          alias_method_chain :find_by_sql, :read_from_slave
-          alias_method_chain :connection, :read_from_slave
+          alias_method :find_by_sql_without_read_from_slave, :find_by_sql
+          alias_method :find_by_sql, :find_by_sql_with_read_from_slave
+          alias_method :connection_without_read_from_slave, :connection
+          alias_method :connection, :connection_with_read_from_slave
         end
       end
 
       begin
         calculation_base = ActiveRecord::Relation  # rails 3
         calculation_base.send(:include, CalculationMethod)
-        calculation_base.alias_method_chain :calculate, :read_from_slave
+        calculation_base.send(:alias_method, :calculate_without_read_from_slave, :calculate)
+        calculation_base.send(:alias_method, :calculate, :calculate_with_read_from_slave)
       rescue NameError  # rails 2
         base.extend(CalculationMethod)
         base.class_eval do
           class << self
-            alias_method_chain :calculate, :read_from_slave
+            alias_method :calculate_without_read_from_slave, :calculate
+            alias_method :calculate, :calculate_with_read_from_slave
           end
         end
       end
@@ -100,7 +105,8 @@ module ReadFromSlave
       base = ActiveRecord::Base
       base.class_eval do
         class << self
-          alias_method_chain :connection, :slave_db_scope unless ReadFromSlave.all_reads_on_slave
+          alias_method :connection_without_slave_db_scope, :connection unless ReadFromSlave.all_reads_on_slave
+          alias_method :connection, :connection_with_slave_db_scope unless ReadFromSlave.all_reads_on_slave
         end
       end
     end
